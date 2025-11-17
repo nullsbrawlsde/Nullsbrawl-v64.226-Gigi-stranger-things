@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore Stipendio Netto Italiano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* NEW: Plain text header without container */
+        .text-header {
+            text-align: center;
+            padding: 30px 20px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .text-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1976D2;
+        }
+        
+        .text-header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .salary-calculator-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-top: 20px;
+        }
+
+        .calculator-card {
+            padding: 25px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #1976D2;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #008d7d;
+            text-transform: uppercase;
+        }
+
+        .input-with-tooltip {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-with-tooltip input,
+        .input-with-tooltip select {
+            flex: 1;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #aed0cc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: #ffffff;
+            color: #334155;
+            transition: all 0.3s ease;
+            height: 48px;
+            font-weight: 600;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1976D2;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
+        }
+
+        input:hover, select:hover {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+
+        input.error, select.error {
+            border: 2px solid #dc3545;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .checkbox-group:hover {
+            background: #f1f5f9;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            margin-right: 8px;
+            accent-color: #1976D2;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 6px;
+            cursor: pointer;
+            color: #1976D2;
+            font-size: 0.85rem;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: #ffffff;
+            color: #334155;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 100;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            font-weight: 400;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .calculate-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: #1976D2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px auto 0;
+        }
+
+        .calculate-btn:hover {
+            background: #1565C0;
+            transform: translateY(-2px);
+        }
+
+        .results-container {
+            text-align: center;
+            padding: 15px 0;
+            display: none;
+        }
+
+        .net-salary {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #27AE60;
+            margin: 15px 0 8px;
+        }
+
+        .net-annual {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        .chart-tabs {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        /* UPDATED: Tab styling - more visible inactive state */
+        .chart-tab {
+            padding: 10px 20px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0; /* Added border */
+            color: #64748b; /* More visible text color */
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chart-tab:first-child {
+            border-radius: 6px 0 0 6px;
+        }
+
+        .chart-tab:last-child {
+            border-radius: 0 6px 6px 0;
+        }
+
+        .chart-tab:hover {
+            background: #e8f0fe; /* Hover state */
+            color: #1976D2;
+        }
+
+        .chart-tab.active {
+            background: #1976D2;
+            color: white;
+            border-color: #1976D2; /* Match active state */
+        }
+
+        .chart-container {
+            display: none;
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .chart-container.active {
+            display: block;
+        }
+
+        .disclaimer {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(39, 174, 96, 0.08);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            text-align: left;
+            border-left: 3px solid #27AE60;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .checkbox-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .net-salary {
+                font-size: 1.8rem;
+            }
+            
+            .text-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .text-header p {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chart-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .chart-tab {
+                width: 100%;
+                margin-bottom: 5px;
+                border-radius: 6px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NEW: Plain text header -->
+    <div class="text-header">
+        <h1>Calcolo Stipendio Netto Online</h1>
+        <p>È sufficiente inserire il reddito annuo lordo e i dati relativi all'impiego per calcolare lo stipendio mensile netto in base alle aliquote IRPEF aggiornate al 2025. Che siate dipendenti a tempo pieno, part-time, apprendisti, a tempo indeterminato o a tempo determinato, il calcolatore supporta tutti i tipi di contratto.</p>
+    </div>
+
+    <div class="salary-calculator-container">
+        <div class="calculator-card">
+            <div class="section-title">Dati di calcolo</div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="grossSalary">Stipendio lordo annuale (€)</label>
+                    <input type="number" id="grossSalary" min="0" step="100" placeholder="Es. 30000">
+                    <div class="error-message" id="grossSalaryError">Campo obbligatorio</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="region">Regione di residenza</label>
+                    <div class="input-with-tooltip">
+                        <select id="region">
+                            <option value="" selected disabled>Seleziona</option>
+                            <option value="Abruzzo">Abruzzo</option>
+                            <option value="Basilicata">Basilicata</option>
+                            <option value="Bolzano">Bolzano (PAB)</option>
+                            <option value="Calabria">Calabria</option>
+                            <option value="Campania">Campania</option>
+                            <option value="Emilia-Romagna">Emilia-Romagna</option>
+                            <option value="Friuli Venezia Giulia">Friuli Venezia Giulia</option>
+                            <option value="Lazio">Lazio</option>
+                            <option value="Liguria">Liguria</option>
+                            <option value="Lombardia">Lombardia</option>
+                            <option value="Marche">Marche</option>
+                            <option value="Molise">Molise</option>
+                            <option value="Piemonte">Piemonte</option>
+                            <option value="Puglia">Puglia</option>
+                            <option value="Sardegna">Sardegna</option>
+                            <option value="Sicilia">Sicilia</option>
+                            <option value="Toscana">Toscana</option>
+                            <option value="Trento">Trento (PAT)</option>
+                            <option value="Umbria">Umbria</option>
+                            <option value="Valle d'Aosta">Valle d'Aosta</option>
+                            <option value="Veneto">Veneto</option>
+                        </select>
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">La regione influisce sulle addizionali regionali IRPEF</span>
+                        </div>
+                    </div>
+                    <div class="error-message" id="regionError">Campo obbligatorio</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="monthlyPayments">Numero di mensilità</label>
+                    <div class="input-with-tooltip">
+                        <select id="monthlyPayments">
+                            <option value="12">12</option>
+                            <option value="13" selected>13</option>
+                            <option value="14">14</option>
+                        </select>
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">Numero di stipendi nell'anno</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="workDays">Giorni di lavoro</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="workDays" min="0" max="365" value="365" placeholder="Es. 260">
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">Giorni lavorati nell'anno</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dependentChildren">Figli a carico (21-30 anni)</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="dependentChildren" min="0" placeholder="Es. 0">
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">Figli a carico non disabili</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="welfareBenefits">Welfare / Fringe benefit (€)</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="welfareBenefits" min="0" placeholder="Es. 0">
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">Benefit non monetari erogati dall'azienda</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="checkbox-container">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="apprenticeship">
+                    <label for="apprenticeship">Apprendistato</label>
+                    <div class="tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="tooltip-text">Contratto di apprendistato</span>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="indefinitePeriod" checked>
+                    <label for="indefinitePeriod">Tempo indeterminato</label>
+                    <div class="tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="tooltip-text">Contratto a tempo indeterminato</span>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="dependentSpouse">
+                    <label for="dependentSpouse">Coniuge a carico</label>
+                    <div class="tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="tooltip-text">Coniuge fiscalmente a carico</span>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="otherDependents">
+                    <label for="otherDependents">Altri familiari</label>
+                    <div class="tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="tooltip-text">Altri familiari a carico</span>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="includeBonus" checked>
+                    <label for="includeBonus">Includi bonus €100</label>
+                    <div class="tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="tooltip-text">Bonus Renzi di €100 mensili</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="calculateBtn" class="calculate-btn">Calcola stipendio netto</button>
+        </div>
+        
+        <div class="calculator-card">
+            <div class="results-container" id="resultsContainer">
+                <div class="section-title">Il tuo stipendio netto mensile</div>
+                
+                <div class="net-salary" id="netSalary">€ 1.843,50</div>
+                <div class="net-annual" id="netAnnual">€ 23.965,50 NETTI ANNUALI</div>
+                
+                <div class="chart-tabs">
+                    <button class="chart-tab active" data-chart="flow">Flusso di Calcolo</button>
+                    <button class="chart-tab" data-chart="composition">Composizione Stipendio</button>
+                </div>
+                
+                <div class="chart-container active" id="flowChartContainer">
+                    <canvas id="flowChart"></canvas>
+                </div>
+                
+                <div class="chart-container" id="compositionChartContainer">
+                    <canvas id="compositionChart"></canvas>
+                </div>
+                
+                <div class="disclaimer">
+                    <p><strong>Nota:</strong> Questo calcolo è puramente indicativo. I risultati sono basati sulle aliquote fiscali 2025 e potrebbero differire dallo stipendio reale.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Regional tax rates
+            const regionalRates = {
+                "Abruzzo": { rates: [1.23, 1.23, 1.23, 1.23], flat: true },
+                "Basilicata": { rates: [1.23, 1.23, 1.23, 1.23], flat: true },
+                "Bolzano": { rates: [1.23, 1.23, 1.23, 1.73], flat: false },
+                "Calabria": { rates: [1.73, 1.73, 1.73, 1.73], flat: true },
+                "Campania": { rates: [1.73, 2.96, 3.20, 3.33], flat: false },
+                "Emilia-Romagna": { rates: [1.33, 1.93, 2.93, 3.33], flat: false },
+                "Friuli Venezia Giulia": { rates: [0.70, 1.23, 1.23, 1.23], flat: false },
+                "Lazio": { rates: [1.73, 3.33, 3.33, 3.33], flat: false },
+                "Liguria": { rates: [1.23, 1.23, 1.23, 1.23], flat: true },
+                "Lombardia": { rates: [1.23, 1.58, 1.72, 1.73], flat: false },
+                "Marche": { rates: [1.23, 1.53, 1.70, 1.73], flat: false },
+                "Molise": { rates: [1.73, 1.93, 3.33, 3.33], flat: false },
+                "Piemonte": { rates: [1.62, 2.13, 2.75, 3.33], flat: false },
+                "Puglia": { rates: [1.33, 1.43, 1.63, 1.85], flat: false },
+                "Sardegna": { rates: [1.23, 1.23, 1.23, 1.23], flat: true },
+                "Sicilia": { rates: [1.23, 1.23, 1.23, 1.23], flat: true },
+                "Toscana": { rates: [1.42, 1.43, 3.32, 3.33], flat: false },
+                "Trento": { rates: [1.23, 1.23, 1.23, 1.73], flat: false },
+                "Umbria": { rates: [1.73, 3.02, 3.12, 3.33], flat: false },
+                "Valle d'Aosta": { rates: [1.23, 1.23, 1.23, 1.23], flat: true },
+                "Veneto": { rates: [1.23, 1.23, 1.23, 1.23], flat: true }
+            };
+            
+            // Initialize charts
+            let flowChart, compositionChart;
+            
+            // Calculate button
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            // Chart tabs
+            const chartTabs = document.querySelectorAll('.chart-tab');
+            chartTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    chartTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const chartType = this.getAttribute('data-chart');
+                    document.querySelectorAll('.chart-container').forEach(c => c.classList.remove('active'));
+                    document.getElementById(`${chartType}ChartContainer`).classList.add('active');
+                });
+            });
+            
+            // Function to validate form
+            function validateForm() {
+                const grossSalary = document.getElementById('grossSalary');
+                const region = document.getElementById('region');
+                let isValid = true;
+                
+                // Reset errors
+                document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+                document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+                
+                // Validate gross salary
+                if (!grossSalary.value || parseFloat(grossSalary.value) <= 0) {
+                    grossSalary.classList.add('error');
+                    document.getElementById('grossSalaryError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Validate region
+                if (!region.value) {
+                    region.classList.add('error');
+                    document.getElementById('regionError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+            
+            // Function to scroll to first error
+            function scrollToFirstError() {
+                const firstError = document.querySelector('.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center'
+                    });
+                }
+            }
+            
+            calculateBtn.addEventListener('click', function() {
+                // Validate form
+                if (!validateForm()) {
+                    scrollToFirstError();
+                    return;
+                }
+                
+                // Get input values
+                const grossSalary = parseFloat(document.getElementById('grossSalary').value) || 0;
+                
+                resultsContainer.style.display = 'block';
+                
+                const monthlyPayments = parseInt(document.getElementById('monthlyPayments').value) || 13;
+                const workDays = parseInt(document.getElementById('workDays').value) || 0;
+                const dependentChildren = parseInt(document.getElementById('dependentChildren').value) || 0;
+                const welfareBenefits = parseFloat(document.getElementById('welfareBenefits').value) || 0;
+                const apprenticeship = document.getElementById('apprenticeship').checked;
+                const indefinitePeriod = document.getElementById('indefinitePeriod').checked;
+                const dependentSpouse = document.getElementById('dependentSpouse').checked;
+                const otherDependents = document.getElementById('otherDependents').checked;
+                const includeBonus = document.getElementById('includeBonus').checked;
+                const region = document.getElementById('region').value;
+                
+                // Get regional tax rates
+                const regionData = regionalRates[region] || { rates: [1.23, 1.23, 1.23, 1.23], flat: true };
+                
+                // Calculate net salary
+                const inps = grossSalary * 0.092;
+                const taxableIncome = grossSalary - inps;
+                
+                // National IRPEF
+                let irpef = 0;
+                if (taxableIncome <= 15000) {
+                    irpef = taxableIncome * 0.23;
+                } else if (taxableIncome <= 28000) {
+                    irpef = 15000 * 0.23 + (taxableIncome - 15000) * 0.25;
+                } else if (taxableIncome <= 50000) {
+                    irpef = 15000 * 0.23 + 13000 * 0.25 + (taxableIncome - 28000) * 0.35;
+                } else {
+                    irpef = 15000 * 0.23 + 13000 * 0.25 + 22000 * 0.35 + (taxableIncome - 50000) * 0.43;
+                }
+                
+                // Regional tax
+                let regionalTax = 0;
+                if (regionData.flat) {
+                    regionalTax = taxableIncome * (regionData.rates[0] / 100);
+                } else {
+                    if (taxableIncome > 50000) {
+                        regionalTax += (taxableIncome - 50000) * (regionData.rates[3] / 100);
+                    }
+                    if (taxableIncome > 28000) {
+                        const amount = Math.min(taxableIncome, 50000) - 28000;
+                        regionalTax += amount * (regionData.rates[2] / 100);
+                    }
+                    if (taxableIncome > 15000) {
+                        const amount = Math.min(taxableIncome, 28000) - 15000;
+                        regionalTax += amount * (regionData.rates[1] / 100);
+                    }
+                    regionalTax += Math.min(taxableIncome, 15000) * (regionData.rates[0] / 100);
+                }
+                
+                // Deductions
+                let deductions = 800 + (dependentChildren * 180);
+                if (dependentSpouse) deductions += 800;
+                if (otherDependents) deductions += 750;
+                
+                // Bonus
+                const bonus = includeBonus ? (100 * monthlyPayments) : 0;
+                
+                // Apprenticeship discount
+                const apprenticeshipDiscount = apprenticeship ? grossSalary * 0.05 : 0;
+                
+                // Net calculation
+                const totalTaxes = irpef + regionalTax;
+                const netAnnual = grossSalary - inps - totalTaxes + deductions + bonus - apprenticeshipDiscount + welfareBenefits;
+                const netMonthly = netAnnual / monthlyPayments;
+                
+                // Display results
+                document.getElementById('netSalary').textContent = '€ ' + formatCurrency(netMonthly);
+                document.getElementById('netAnnual').textContent = '€ ' + formatCurrency(netAnnual) + ' NETTI ANNUALI';
+                
+                // Update charts
+                updateCharts(
+                    grossSalary,
+                    netAnnual,
+                    inps,
+                    irpef,
+                    regionalTax,
+                    deductions,
+                    bonus,
+                    welfareBenefits
+                );
+            });
+            
+            // Format currency
+            function formatCurrency(value) {
+                return value.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+            
+            // Initialize or update charts
+            function updateCharts(gross, net, inps, irpef, regionalTax, deductions, bonus, welfare) {
+                // Colors
+                const chartColors = ['#1976D2', '#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50'];
+                
+                // Destroy existing charts
+                if (flowChart) flowChart.destroy();
+                if (compositionChart) compositionChart.destroy();
+                
+                // Flow chart
+                const flowCtx = document.getElementById('flowChart').getContext('2d');
+                flowChart = new Chart(flowCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Lordo', 'INPS', 'IRPEF', 'Regionale', 'Detrazioni', 'Netto'],
+                        datasets: [{
+                            data: [gross, inps, irpef, regionalTax, deductions, net],
+                            backgroundColor: chartColors,
+                            borderWidth: 0,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                titleColor: '#333',
+                                bodyColor: '#333',
+                                borderColor: '#ddd',
+                                borderWidth: 1,
+                                padding: 10,
+                                cornerRadius: 6
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(200, 200, 200, 0.2)' },
+                                ticks: { callback: v => '€' + v.toLocaleString() }
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+                
+                // Composition chart
+                const compositionCtx = document.getElementById('compositionChart').getContext('2d');
+                compositionChart = new Chart(compositionCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Stipendio Netto', 'INPS', 'IRPEF', 'Add. Regionale', 'Welfare'],
+                        datasets: [{
+                            data: [net, inps, irpef, regionalTax, welfare],
+                            backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#795548'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 15, usePointStyle: true }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                titleColor: '#333',
+                                bodyColor: '#333',
+                                borderColor: '#ddd',
+                                borderWidth: 1,
+                                padding: 10,
+                                cornerRadius: 6,
+                                callbacks: {
+                                    label: ctx => {
+                                        const label = ctx.label || '';
+                                        const value = ctx.parsed || 0;
+                                        const pct = Math.round(value / gross * 100);
+                                        return `${label}: €${value.toLocaleString()} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+            
+            // Real-time validation
+            document.getElementById('grossSalary').addEventListener('input', function() {
+                if (this.value && parseFloat(this.value) > 0) {
+                    this.classList.remove('error');
+                    document.getElementById('grossSalaryError').style.display = 'none';
+                }
+            });
+            
+            document.getElementById('region').addEventListener('change', function() {
+                if (this.value) {
+                    this.classList.remove('error');
+                    document.getElementById('regionError').style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
